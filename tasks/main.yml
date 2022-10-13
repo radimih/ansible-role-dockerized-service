@@ -1,0 +1,46 @@
+---
+- name: Create '{{ dest }}' directory if it does not exists
+  ansible.builtin.file:
+    path: '{{ dest }}'
+    state: directory
+    mode: 0755
+
+- name: Configuring Docker Compose file for {{ service_name }}
+  ansible.builtin.copy:
+    content: '{{ compose }}'
+    dest: '{{ dest }}/docker-compose.yml'
+
+- name: Copy files for {{ service_name }}
+  ansible.builtin.copy:
+    src: '{{ item }}'
+    dest: '{{ dest }}'
+  loop: '{{ files }}'
+
+- name: Docker pull images
+  ansible.builtin.command:
+    cmd: docker compose pull
+    chdir: '{{ dest }}'
+  register: result
+  changed_when: "'... status: downloaded newer image' in result.stderr | default('')"
+
+- name: Shutdown {{ service_name }} before its up
+  ansible.builtin.command:
+    cmd: docker compose down --remove-orphans
+    chdir: '{{ dest }}'
+  register: result
+  changed_when: "'... done' in result.stderr | default('')"
+  when: down_before_up | bool
+
+- name: Start/restart {{ service_name }}
+  ansible.builtin.command:
+    cmd: docker compose up -d --remove-orphans
+    chdir: '{{ dest }}'
+  register: result
+  changed_when: "'... done' in result.stderr | default('')"
+
+- name: Wait {{ service_name }} ready to serve...
+  ansible.builtin.wait_for:
+    port: '{{ service_port }}'
+    delay: 3
+    timeout: 60
+  when: service_port|int != 0

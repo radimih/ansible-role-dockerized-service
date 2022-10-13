@@ -1,0 +1,52 @@
+galaxy_info:
+  author: Radimir Mikhailov
+  description: Run service via Docker Compose
+  role_name: dockerized-service
+
+  license: MIT
+
+  min_ansible_version: 2.7
+
+  platforms:
+    - name: Debian
+      versions:
+        - all
+    - name: Fedora
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+
+  galaxy_tags: []
+
+dependencies: []
+
+argument_specs:
+  main:
+    options:
+      compose:
+        description: Шаблон для формирования файла docker-compose.yml
+        required: true
+        type: str
+      dest:
+        description: Каталог, в котором формируется файл docker-compose.yml
+        required: true
+        type: str
+      down_before_up:
+        description: Выполнять ли команду docker compose down до команды docker compose up
+        required: false
+        type: bool
+      files:
+        description: Список файлов/каталогов для копирования в 'dest'
+        required: false
+        type: list
+        elements: str
+      service_name:
+        description: Название сервиса. Может быть произвольным - используется только в сообщениях Ansible
+        required: true
+        type: str
+      service_port:
+        description: Номер порта сервиса. Если не 0, то после запуска сервиса происходит ожидание соединения с портом
+        required: false
+        type: int
