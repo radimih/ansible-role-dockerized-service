@@ -9,11 +9,13 @@
   ansible.builtin.copy:
     content: '{{ compose }}'
     dest: '{{ dest }}/docker-compose.yml'
+    mode: 0644
 
 - name: Copy files for {{ service_name }}
   ansible.builtin.copy:
     src: '{{ item }}'
     dest: '{{ dest }}'
+    mode: 0644
   loop: '{{ files }}'
 
 - name: Docker pull images
