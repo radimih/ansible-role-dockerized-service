@@ -23,14 +23,14 @@
     cmd: docker compose pull
     chdir: '{{ dest }}'
   register: result
-  changed_when: "'... status: downloaded newer image' in result.stderr | default('')"
+  changed_when: "'Pull complete' in result.stderr | default('')"
 
 - name: Shutdown {{ service_name }} before its up
   ansible.builtin.command:
     cmd: docker compose down --remove-orphans
     chdir: '{{ dest }}'
   register: result
-  changed_when: "'... done' in result.stderr | default('')"
+  changed_when: "'Removed' in result.stderr | default('')"
   when: down_before_up | bool
 
 - name: Start/restart {{ service_name }}
@@ -38,7 +38,7 @@
     cmd: docker compose up -d --remove-orphans
     chdir: '{{ dest }}'
   register: result
-  changed_when: "'... done' in result.stderr | default('')"
+  changed_when: "'Started' in result.stderr | default('')"
 
 - name: Wait {{ service_name }} ready to serve...
   ansible.builtin.wait_for:
